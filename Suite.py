@@ -8,11 +8,11 @@ from datetime import datetime
 import sys
 import numpy as np
 import os
-from lib import OOP_LCB
-from lib import SCPI_interface
-from lib import edge_telnet
-from lib import Waveshare_Relay_Controller
-from lib import labjack
+import lib.OOP_LCB as OOP_LCB
+import lib.SCPI_interface as SCPI_interface
+import lib.edge_telnet as edge_telnet
+import lib.Waveshare_Relay_Controller as Waveshare_Relay_Controller
+import lib.labjack as labjack
 from queue import Queue
 
 #Modbus 11/4
