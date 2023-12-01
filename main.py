@@ -10,9 +10,9 @@ import numpy as np
 import os
 import lib.OOP_LCB as OOP_LCB
 import lib.SCPI_interface as SCPI_interface
-import lib.edge_telnet as edge_telnet
+import lib.Edge_telnet as edge_telnet
 import lib.Waveshare_Relay_Controller as Waveshare_Relay_Controller
-import lib.labjack as labjack
+import lib.Labjack as labjack
 from queue import Queue
 
 #Modbus 11/4
