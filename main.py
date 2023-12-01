@@ -20,7 +20,7 @@ from queue import Queue
 #BATT 18/7
 #EAC 17/6
 
-test='voltage_dip_test'
+test='SI001'
 
 
 ##Definition of variables present in the test.
@@ -504,7 +504,7 @@ if lyra_present:
     #Log the first calibration parameters of LCB.
     logging.info('Lyra calibration parameters: '+str(lcb.get_v1_offsets())+'  '+str(lcb.get_v1_gains()))
 logging.info('Test initialization - '+str(filename))
-logging.info('Initial condition: '+tests[test_name])
+# logging.info('Initial condition: '+tests[test_name])
 
 #Check for the initial condition.
 #check_IC_setupB(tests[test_name])
