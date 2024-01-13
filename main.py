@@ -509,10 +509,7 @@ logging.info('Test initialization - '+str(filename))
 #Check for the initial condition.
 #check_IC_setupB(tests[test_name])
 
-#Import the testing sequence.
-df=pd.read_excel('./Test sequences/'+filename+'.xlsx',header=[0])
-##    for index,row in df.iterrows():
-##        logging.info(row)
+
     
 try:                                   
     #DEFAULT is off and 0V output.
@@ -543,7 +540,7 @@ exec_time=time.time()
 logging.info("")
 logging.info('Synchronizing pulse')
 logging.info("")
-#relay_module.close_relay(8)
+relay_module.close_relay(8)
 if not genset_app:
     if relays_present:
         relays_queue.put(('close',5))
@@ -581,7 +578,10 @@ if edgepresent:
 if genset_app:
     t6 = threading.Thread(target=labjack_thread,args=(labj))
 
-
+#Import the testing sequence.
+df=pd.read_excel('./Test sequences/'+filename+'.xlsx',header=[0])
+##    for index,row in df.iterrows():
+##        logging.info(row)
 
 #Test framework
 for k in range(testncycles):
@@ -768,7 +768,6 @@ if gridsim_present:
         dfgrid[['Grid_Sim P_'+"{0:02d}".format(i) for i in range(1,3+1)]]=dfgrid["GridSim P"].str.split(",", expand=True)
         dfgrid[['Grid_Sim Q_'+"{0:02d}".format(i) for i in range(1,3+1)]]=dfgrid["GridSim Q"].str.split(",", expand=True)
         dfgrid.to_excel('./'+filename+'/'+filename+'_General_data.xlsx',header=True,index=False)
-
 
     except:
         pass

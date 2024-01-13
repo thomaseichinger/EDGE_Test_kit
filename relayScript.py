@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
+'''
+Run the program with 'python.exe relayScript.py -[c|o] [1-8]'
+-1 == closed (ON)
+-0 == open (OFF)
+1-8 == relay input numbers
+
+Zola SF Lab Relay
+1 == MX45/Grim_Sim
+2 == N/A
+3 == Aux Load
+4 == N/A
+5 == N/A
+6 == N/A
+7 == N/A
+8 == N/A
+'''
+
+
 import socket
 import time
 import sys
@@ -22,23 +40,27 @@ def flipper(command:int, relayNum:int):
     cmd[10] = int(command)  # this value to command relay
     cmd[11]= 0 
 
+    buffersize=255
     print(bytearray(cmd))
     s.send(bytearray(cmd))
+    data = bytes(''.encode('utf-8'))
+    data += s.recv(buffersize)
+    print("data: ")
+    print(data)
     time.sleep(0.2)
     s.close()     
 
 def main():
     args = sys.argv[1:]
     if len(args) != 2 or int(args[1]) < 1 or int(args[1]) > 8:
-        print("Incorrect args try again: relayScript.py [-c|-o] [1-8]")
+        print("Incorrect args try again: relayScript.py [-1|-0] [1-8]")
         sys.exit()
-    if args[0] == '-c': #close relay
+    if args[0] == '-1': #close relay
         flipper(0xFF,args[1])
-    elif args[0] == '-o':   #open relay
+    elif args[0] == '-0':   #open relay
         flipper(0x00, args[1])
     elif args[0] == '-f':   #flip relay
         flipper(0x55,args[1])         
 
 if __name__ == "__main__":
     main()
-

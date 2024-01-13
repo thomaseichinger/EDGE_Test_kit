@@ -1,0 +1,4 @@
+step,ncycles,description,Exit condition,Value,Grid sim on_off,GridSimV,GridSimF,slew_rate,grid_relay,load_relay,e_load_W,eload_VAr,PV1_W,PV2_W,PV3_W,PV4_W,PV5_W,PV6_W
+0,1,Standby,Timer,60,0,5,50,1000,1,0,0,0,0,0,0,0,0,0
+1,1,dischage,Timer,60,1,230,50,1000,0,1,0,0,0,0,0,0,0,0
+2,1,charge,Timer,120,1,220,50,1000,1,0,0,0,0,0,0,0,0,0
