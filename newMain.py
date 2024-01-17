@@ -1,14 +1,11 @@
 import time
 import datetime as dt
-import math
 import pandas as pd
 import logging
-import threading
 import sys
 import os
 import socket
 import subprocess
-import urllib3
 
 term = '\n'
 filename='SIP001_SF5.csv'
@@ -52,7 +49,7 @@ logging.basicConfig(
     ]
 )
 
-#Dridsim query function
+#Gridsim query function
 def query(msg: bytes, debug = False):
     cmd = bytes((msg+term).encode('utf-8'))
     instrument.send(cmd)

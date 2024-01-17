@@ -1,0 +1,357 @@
+Started query 4000100323 at 2024-01-12 14:26:47.834077
+Finished querying 4000100323 at 2024-01-12 14:26:48.888907
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 229.8
+Output F: 49.9
+Output W 4000100323: 6
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:26:52.055083
+Finished querying 4000100323 at 2024-01-12 14:26:52.098182
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.1
+Output F: 49.9
+Output W 4000100323: 19
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:26:53.256071
+Finished querying 4000100323 at 2024-01-12 14:26:53.274763
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.1
+Output F: 49.9
+Output W 4000100323: 19
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:26:54.438294
+Finished querying 4000100323 at 2024-01-12 14:26:54.471199
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 229.4
+Output F: 49.9
+Output W 4000100323: 37
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:26:55.604854
+Finished querying 4000100323 at 2024-01-12 14:26:55.639385
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 229.4
+Output F: 49.9
+Output W 4000100323: 37
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:26:56.797362
+Finished querying 4000100323 at 2024-01-12 14:26:56.820677
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 229.4
+Output F: 49.9
+Output W 4000100323: 37
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:26:57.970523
+Finished querying 4000100323 at 2024-01-12 14:26:58.003973
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 16
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:26:59.135717
+Finished querying 4000100323 at 2024-01-12 14:26:59.153124
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 16
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:00.285610
+Finished querying 4000100323 at 2024-01-12 14:27:00.319070
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 2
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:01.467626
+Finished querying 4000100323 at 2024-01-12 14:27:01.485511
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 2
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:02.608623
+Finished querying 4000100323 at 2024-01-12 14:27:02.628782
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 2
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:03.771884
+Finished querying 4000100323 at 2024-01-12 14:27:03.795437
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 2
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:04.953514
+Finished querying 4000100323 at 2024-01-12 14:27:04.978873
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 2
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:06.128381
+Finished querying 4000100323 at 2024-01-12 14:27:06.144148
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 49.9
+Output W 4000100323: 7
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:07.267536
+Finished querying 4000100323 at 2024-01-12 14:27:07.294523
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 49.9
+Output W 4000100323: 7
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:08.417275
+Finished querying 4000100323 at 2024-01-12 14:27:08.435251
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 49.9
+Output W 4000100323: 7
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:09.577905
+Finished querying 4000100323 at 2024-01-12 14:27:09.591802
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 3
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:10.743642
+Finished querying 4000100323 at 2024-01-12 14:27:10.783476
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 3
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:11.915533
+Finished querying 4000100323 at 2024-01-12 14:27:11.942349
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 58
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:13.098211
+Finished querying 4000100323 at 2024-01-12 14:27:13.131936
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 230.0
+Output F: 50.0
+Output W 4000100323: 58
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0
+Started query 4000100323 at 2024-01-12 14:27:14.274787
+Finished querying 4000100323 at 2024-01-12 14:27:14.296844
+SOC: 40
+Input V: 0.0
+Input F: 0.0
+Output V: 229.9
+Output F: 49.9
+Output W 4000100323: 3
+Input W 4000100323: 0
+PV_Power4000100323: 0
+Battery Voltage: 52.4
+Battery Charge Current: 0
+Heatsink Temp: 48
+Paygo Permanent Unlock: True
+Paygo Time Remaining: 0
+Battery Float Voltage: 56.0
+Battery Bulk Voltage: 56.0

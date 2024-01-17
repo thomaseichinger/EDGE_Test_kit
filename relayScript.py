@@ -2,13 +2,13 @@
 # -*- coding:utf-8 -*-
 
 '''
-Run the program with 'python.exe relayScript.py -[c|o] [1-8]'
+Run the program with 'python.exe relayScript.py -[1|0] [1-8]'
 -1 == closed (ON)
 -0 == open (OFF)
 1-8 == relay input numbers
 
 Zola SF Lab Relay
-1 == MX45/Grim_Sim
+1 == MX45/Grid_Sim
 2 == N/A
 3 == Aux Load
 4 == N/A
