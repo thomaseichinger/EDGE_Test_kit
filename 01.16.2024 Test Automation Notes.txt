@@ -1,0 +1,29 @@
+PATH: C:\Users\TEST_BED_COMPUTER\Desktop\EDGE_Test_kit
+
+Script Run order:
+1) Yokogawa
+2) (possibly) REST_API
+3) newMain
+
+Implemented scripts:
+- newMain.py
+	- ingests Test Sequences
+	- calls/controls relays
+	- commands/controls GridSim/MX45
+- gridsim.py
+	- script to quickly command/control the MX45 without need for creating a new test sequence
+- yokogawa.py
+	- script to log data from the Yokogawa WT1600 DAQ
+- REST_API.py
+	- script to query and log data from the Edge Systems
+- relayScript.py
+	- script to turn relays on/off, gets called by newMain.py
+
+TBD Work:
+- NHR/E-Load 
+- PV-sims
+- Exit conditions for REST_API/Edge Systems
+- Clean up newMain.py
+- Scalability
+- Modularity
+- UI(?) for Test Sequence/Configuration generation
