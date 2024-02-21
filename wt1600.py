@@ -22,11 +22,11 @@ SAVE_DIRECTION = STOP + ';' + CLEAR +';:STOR:DIR FILE'
 MEM_WORKAROUND = MEM_SETUP + ';' + CLEAR + ';:STOR:DIR FILE' #fix this nonsense
 
 
-names = []
-_names = ['URMS','UMN','UDC','UAC','IRMS','IMN','IDC','IAC','P','S','Q','LAMB','PHI','FU','FI']
-for i in range(1,7):
+#names = []
+names = ['URMS','UMN','UDC','UAC','IRMS','IMN','IDC','IAC','P','S','Q','LAMB','PHI','FU','FI']
+'''for i in range(1,7):
     for x in _names:
-        names.append(x + '_' + str(i))
+        names.append(x + '_' + str(i))'''
 
 def query(interface, cmd_str, b_expect=4, buffersize=20480, debug=False):
     #Basic query, returns response as bytes
@@ -86,17 +86,24 @@ def get_data(interface, element=1):
     Get a single element's data
     '''
     start_num = (element-1) * 15
-    #data = []
-    data = {}
+    data = ''
+    #data = {}
+    j = 0
     for i in range(start_num, start_num+15):
         msg = ':NUMERIC:NORMAL:VALUE? {}'.format(i+1)
         resp = query(interface, msg)
         try:
             #data.append(float(resp[4:]))
+            #print(str(resp[4:]))
             #print(float(resp[4:]))
-            data[names[i]] = float(resp[4:])    
+            data+=(',' + str(float(resp[4:])))
         except ValueError as e:
-            data[names[i]] = resp[4:]
-            #print (e, i, resp)
-            continue        
+            try:
+                #print(str(resp[5:]))
+                #print(float(resp[5:]))
+                data+= (',' + str(float(resp[5:])))
+            except ValueError as e:
+                print (e, i, resp)
+            continue  
+    #print(data)      
     return data

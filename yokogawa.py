@@ -3,8 +3,7 @@ import time
 from datetime import datetime as dt
 import sys
 import wt1600 as yoko
-
-_names = ['URMS','UMN','UDC','UAC','IRMS','IMN','IDC','IAC','P','S','Q','LAMB','PHI','FU','FI']
+import os
 
 
 term = '\n'
@@ -34,25 +33,32 @@ except Exception as e:
     s.close()
     sys.exit()
 
+filename= 'Yokogawa_' + str(dt.now().strftime("%Y%m%d.%H%M%S"))
+if not os.path.exists('./'+filename):
+    os.mkdir('./'+filename)
+for j in range(1,7):
+    # Open a text file in append and read mode
+    with open('./'+filename +'/ch'+str(j)+ ".csv", "a+") as f:
+        f.write("Timestamp,URMS,UMN,UDC,UAC,IRMS,IMN,IDC,IAC,P,S,Q,LAMB,PHI,FU,FI")
 
-# Open a text file in append and read mode
-with open("Yokogawa_" + str(dt.now().strftime("%Y%m%d.%H%M%S")) + ".txt", "a+") as f:
-    while True:
-        for j in range(1,7):
-            data = []
-            data = str( dt.now())
-            data+=(str(yoko.get_data(s,j)) + "\n")
+print("Press Enter to end program...")
+while True:
+    for j in range(1,7):
+        # Open a text file in append and read mode
+        with open('./'+filename +'/ch'+str(j)+ ".csv", "a+") as f:
+            f.write("\n"+str(dt.now().strftime("%Y%m%d.%H%M%S")))
+            f.write(str(yoko.get_data(s,j)))
+            #print(data)
             # Write to the end of the file
-            f.writelines(data)
-        #takes roughly .6secs to query and write all 6 elements
-        #sleeping .4secs to create 1 sec interval between query of the same element
-        time.sleep(.4)
-        if msvcrt.kbhit():
-            if msvcrt.getwche() == '\r':
-                break
+            #f.write(str(data))
+    #takes roughly .6secs to query and write all 6 elements
+    #sleeping .4secs to create 1 sec interval between query of the same element
+    time.sleep(.4)
+    if msvcrt.kbhit():
+        if msvcrt.getwche() == '\r':
+            break
 
 
-input("Press Enter to continue...")
 print("Closing socket interface to Yokogawa...")
 s.close()
 time.sleep(5)

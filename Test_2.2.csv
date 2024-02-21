@@ -1,0 +1,4 @@
+step,ncycles,description,Exit condition,Value,Grid sim on_off,GridSimV,GridSimF,slew_rate,grid_relay,load_relay,e_load_W,eload_VAr,PV1_W,PV2_W,PV3_W,PV4_W,PV5_W,PV6_W
+0,1,grid off and No load + wait 5 min,Timer,30,0,230,50,1000,0,1,0,0,0,0,0,0,0,0
+1,1,grid off and No load + wait 5 min,Timer,300,1,230,50,1000,1,0,0,0,0,0,0,0,0,0
+2,1,grid off and No load + wait 5 min,Timer,30,0,230,50,1000,0,1,0,0,0,0,0,0,0

@@ -6,10 +6,19 @@ import sys
 import os
 import socket
 import subprocess
+import urllib3
+import json
 
 term = '\n'
-filename='SIP001_SF5.csv'
+filename='Test_2.2'
 gridsim_present=1
+edge_pcu=['4000100158','4000100104','4000100323','4000100247','4000100142']
+http1 = urllib3.PoolManager()
+
+#Create directory for test case.
+if not os.path.exists('./'+filename):
+    os.mkdir('./'+filename)
+
 
 def main():
     #filename = sys.argv[1:]
@@ -17,7 +26,7 @@ def main():
     #    testncycles = sys.argv[2:]
     try:
         #Import the testing sequence.
-        df=pd.read_csv(str('SIP001_SF5.csv\\SITP001_SF5.csv'),header=[0])
+        df=pd.read_csv(str('./'+filename+".csv"),header=[0])
         ##    for index,row in df.iterrows():
         ##        logging.info(row)
         '''
@@ -27,7 +36,7 @@ def main():
             print("Error while trying to open test sequence")
             print(e)
             sys.exit()'''
-        subprocess.run(["python.exe", "REST_API.py"])
+        #subprocess.run(["python.exe", "REST_API.py"])
         
         testFramework(df)
     except Exception as e:
@@ -35,16 +44,13 @@ def main():
         print(e)
         sys.exit()
 
-#Create directory for test case.
-if not os.path.exists('./'+filename):
-    os.mkdir('./'+filename)
 
 #Create logger object.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler('./'+filename+'/'+filename+".log"),
+        logging.FileHandler('./'+filename+'/'+filename+str(dt.datetime.now().strftime("%Y%m%d.%H%M%S"))+".log"),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -145,9 +151,6 @@ def testFramework(df, testncycles=1):
                                     #GRID SIM
                                     logging.info('Grid Sim Conditions - ON (1) / OFF (0):'+str(row['Grid sim on_off'])+' | Voltage [V]: '+str(row['GridSimV'])+' | Frequency [Hz]: '+str(row['GridSimF']))
                                     grid_sim_write(str(row['Grid sim on_off']),'AC',str(row['GridSimV']),str(row['GridSimF']),str(row['slew_rate']))
-                                    
-                                    subprocess.run(["python.exe", "relayScript.py", "-"+(str(row['grid_relay'])), "1"])
-                                    subprocess.run(["python.exe", "relayScript.py", "-"+(str(row['load_relay'])), "3"])
                                     break
                                 except Exception as error:
                                     print(error)
@@ -155,10 +158,16 @@ def testFramework(df, testncycles=1):
                             if nretries==0:
                                 raise
 
+                        logging.info('')
+                        logging.info('Running relayScript as subprocess...')
+                        try:
+                            subprocess.run(["python.exe", "relayScript.py", "-"+(str(row['grid_relay'])), "1"])
+                            subprocess.run(["python.exe", "relayScript.py", "-"+(str(row['load_relay'])), "3"])
+                            logging.info('Successfully ran relayScript as subprocess')
                         
-
-                            logging.info('')
-
+                        except Exception as e:
+                            logging.info('Failed to run relayScript as subprocess')
+                            logging.info(e)
 
                         #Check for exit conditions
                         logging.info('Exit condition:'+str(row['Exit condition'])+' | Value: '+str(row['Value']))
@@ -175,21 +184,146 @@ def testFramework(df, testncycles=1):
                                 logging.info('Checking timer condition')
                                 starttime = time.time()
 
-                                while time.time()-starttime<row['Value']:
+                                while time.time()-starttime<exit_value:
                                     logging.info('STEP '+str(row['step'])+' - '+str(row['description'])+' - Iteration '+str(j+1))
                                     logging.info('Timer: '+str(round(time.time()-starttime,2))+' out of '+str(row['Value']))
                                     time.sleep(refresh_period)
-
                                 break
+
+                            elif 'Bat Voltage>=' in str(exit_type):
+                                average_bat_v=0
+                                logging.info('Checking Battery voltage condition')
+                                while average_bat_v < exit_value:
+                                    time.sleep(5)
+                                    average_bat_v = 0
+                                    for pcu_id in edge_pcu:
+                                        #print(pcu_id + '\n')
+                                        url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
+                                        logging.info(url)
+                                        try:
+                                            resp = http1.request('GET', url)
+                                        except Exception as e:
+                                            logging.info("Error while trying to query Edge system\n")
+                                            logging.info(e)
+                                            continue
+                                        edge_status=[]
+                                        try:
+                                            edge_status.append(json.loads(resp.data))
+                                            edge_bat_v=(edge_status[0]['data']['status']['general_status'][1]['battery_voltage'])
+                                            logging.info(edge_bat_v)
+                                            average_bat_v+=edge_bat_v
+                                            logging.info(average_bat_v)
+                                        except Exception as e:
+                                            logging.info("Error while trying to read response data\n")
+                                            logging.info(e)
+                                            continue
+                                    average_bat_v = average_bat_v/len(edge_pcu)
+                                    logging.info(average_bat_v)
+                                break
+
+                            elif 'Bat Voltage<' in str(exit_type):
+                                average_bat_v = 60
+                                logging.info('Checking Battery voltage condition')
+                                while average_bat_v > exit_value:
+                                    time.sleep(5)
+                                    average_bat_v = 0
+                                    for pcu_id in edge_pcu:
+                                        #print(pcu_id + '\n')
+                                        url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
+                                        logging.info(url)
+                                        try:
+                                            resp = http1.request('GET', url)
+                                        except Exception as e:
+                                            logging.info("Error while trying to query Edge system\n")
+                                            logging.info(e)
+                                            continue
+                                        edge_status=[]
+                                        try:
+                                            edge_status.append(json.loads(resp.data))
+                                            edge_bat_v=(edge_status[0]['data']['status']['general_status'][1]['battery_voltage'])
+                                            logging.info(edge_bat_v)
+                                            average_bat_v+=edge_bat_v
+                                            logging.info(average_bat_v)
+                                        except Exception as e:
+                                            logging.info("Error while trying to read response data\n")
+                                            logging.info(e)
+                                            continue
+                                    average_bat_v = average_bat_v/len(edge_pcu)
+                                    logging.info(average_bat_v)
+                                break
+
+                            elif 'SOC>' in str(exit_type):
+                                average_SOC = 0
+                                logging.info('Checking Battery charge condition')
+                                while average_SOC < exit_value:
+                                    time.sleep(5)
+                                    average_SOC = 0
+                                    for pcu_id in edge_pcu:
+                                        #print(pcu_id + '\n')
+                                        url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
+                                        logging.info(url)
+                                        try:
+                                            resp = http1.request('GET', url)
+                                        except Exception as e:
+                                            logging.info("Error while trying to query Edge system\n")
+                                            logging.info(e)
+                                            continue
+                                        edge_status=[]
+                                        try:
+                                            edge_status.append(json.loads(resp.data))
+                                            edge_SOC=(edge_status[0]['data']['status']['general_status'][1]['battery_capacity'])
+                                            logging.info(edge_SOC)
+                                            average_SOC+=edge_SOC
+                                            logging.info(average_SOC)
+                                        except Exception as e:
+                                            logging.info("Error while trying to read response data\n")
+                                            logging.info(e)
+                                            continue
+                                    average_SOC = average_SOC/len(edge_pcu)
+                                    logging.info(average_SOC)
+                                break
+
+                            elif 'SOC<' in str(exit_type):
+                                average_SOC = 101
+                                logging.info('Checking Battery charge condition')
+                                while average_SOC > exit_value:
+                                    time.sleep(5)
+                                    average_SOC = 0
+                                    for pcu_id in edge_pcu:
+                                        #print(pcu_id + '\n')
+                                        url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
+                                        logging.info(url)
+                                        try:
+                                            resp = http1.request('GET', url)
+                                        except Exception as e:
+                                            logging.info("Error while trying to query Edge system\n")
+                                            logging.info(e)
+                                            continue
+                                        edge_status=[]
+                                        try:
+                                            edge_status.append(json.loads(resp.data))
+                                            edge_SOC=(edge_status[0]['data']['status']['general_status'][1]['battery_capacity'])
+                                            logging.info(edge_SOC)
+                                            average_SOC+=edge_SOC
+                                            logging.info(average_SOC)
+                                        except Exception as e:
+                                            logging.info("Error while trying to read response data\n")
+                                            logging.info(e)
+                                            continue
+                                    average_SOC = average_SOC/len(edge_pcu)
+                                    logging.info(average_SOC)
+                                break
+
                             
                         logging.info('Condition met, going to next step.')
                         logging.info('')
                         logging.info('-------------')
                         logging.info('')
-    query('OUTP OFF')
+    query('OUTP:IMM OFF')
     query('++loc')
     subprocess.run(["python.exe", "relayScript.py", "-0", "1"])
     subprocess.run(["python.exe", "relayScript.py", "-0", "3"])
+
 
 
 if __name__ == "__main__":

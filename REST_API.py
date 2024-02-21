@@ -34,40 +34,56 @@ filename= 'Edge_Systems_' + str(dt.now().strftime("%Y%m%d.%H%M%S"))
 if not os.path.exists('./'+filename):
     os.mkdir('./'+filename)
 
+for pcu_id in edge_pcu:
+    with open('./'+filename +'/'+pcu_id+ ".csv", "a+") as f:
+        f.write('time start,time end,SOC,Input V,Input F,Output V,Output F,Output W,Input W,PV_Power,Battery Voltage,Battery Charge Current,Heatsink Temp,Paygo Permanent Unlock,Paygo Time Remaining,Battery Float Voltage,load_port_state,Battery Bulk Voltage')
 
 # Step 1 Ask for configuration information
 #Add try catch for failed and move on to next system, ifelse next timestamp
 while True:
+    #time.sleep(1)
+    
     for pcu_id in edge_pcu:
         #print(pcu_id + '\n')
         url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
-        with open('./'+filename +'/'+pcu_id+ ".txt", "a+") as f:
-            f.write("Started query "+ pcu_id + " at " + str(datetime.datetime.now())+'\n')
-            resp = http1.request('GET', url)
+        with open('./'+filename +'/'+pcu_id+ ".csv", "a+") as f:
+            f.write('\n' + str(datetime.datetime.now())+',')
+            try:
+                resp = http1.request('GET', url)
+            except Exception as e:
+                print("Failed\n")
+                print(e)
+                f.write(str(datetime.datetime.now()))
             edge_status=[]
-            edge_status.append(json.loads(resp.data))
-            f.write("Finished querying " + pcu_id + " at " + str(datetime.datetime.now())+'\n')
-
-            f.write('SOC: ' + str(edge_status[0]['data']['status']['general_status'][1]['battery_capacity'])+'\n')
-            f.write('Input V: ' + str(edge_status[0]['data']['status']['general_status'][1]['grid_voltage'])+'\n')
-            f.write('Input F: ' + str(edge_status[0]['data']['status']['general_status'][1]['grid_frequency'])+'\n')
-            f.write('Output V: ' + str(edge_status[0]['data']['status']['general_status'][1]['ac_output_voltage'])+'\n')
-            f.write('Output F: ' + str(edge_status[0]['data']['status']['general_status'][1]['ac_output_frequency'])+'\n')
-            f.write('Output W: ' + str(edge_status[0]['data']['status']['general_status'][1]['ac_output_active_power'])+'\n')
-            f.write('Input W: ' + str(edge_status[0]['data']['status']['general_status_2'][1]['ac_input_active_power'])+'\n')
-            f.write('PV_Power: ' + str(edge_status[0]['data']['status']['general_status_2'][1]['pv_active_power'])+'\n')
-            f.write('Battery Voltage: ' + str(edge_status[0]['data']['status']['general_status'][1]['battery_voltage'])+'\n')
-            f.write('Battery Charge Current: ' + str(edge_status[0]['data']['status']['general_status'][1]['battery_charging_current'])+'\n')
-            f.write('Heatsink Temp: ' + str(edge_status[0]['data']['status']['general_status'][1]['inverter_heat_sink_temp'])+'\n')
-            f.write('Paygo Permanent Unlock: ' + str(edge_status[0]['data']['status']['paygo'][1]['permanent_unlock'])+'\n')
-            f.write('Paygo Time Remaining: ' + str(edge_status[0]['data']['status']['paygo'][1]['time_remaining_s'])+'\n')
-            f.write('Battery Float Voltage: ' + str(edge_status[0]['data']['status']['ratings'][1]['battery_float_voltage'])+'\n')
-            f.write('Battery Bulk Voltage: ' + str(edge_status[0]['data']['status']['ratings'][1]['battery_bulk_voltage'])+'\n')
-
+            try:
+                edge_status.append(json.loads(resp.data))
+                f.write(str(datetime.datetime.now()))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['battery_capacity']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['grid_voltage']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['grid_frequency']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['ac_output_voltage']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['ac_output_frequency']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['ac_output_active_power']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status_2'][1]['ac_input_active_power']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status_2'][1]['pv_active_power']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['battery_voltage']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['battery_charging_current']))
+                f.write(','+str(edge_status[0]['data']['status']['general_status'][1]['inverter_heat_sink_temp']))
+                f.write(','+str(edge_status[0]['data']['status']['paygo'][1]['permanent_unlock']))
+                f.write(','+str(edge_status[0]['data']['status']['paygo'][1]['time_remaining_s']))
+                f.write(','+str(edge_status[0]['data']['status']['ratings'][1]['battery_float_voltage']))
+                f.write(','+str(edge_status[0]['data']['status']['ratings'][1]['load_port_state']))
+                f.write(','+str(edge_status[0]['data']['status']['ratings'][1]['battery_bulk_voltage']))
+            except Exception as e:
+                print(e)
+                for i in range(0,16):
+                    f.write(',N/A')
     time.sleep(1)
     if msvcrt.kbhit():
         if msvcrt.getwche() == '\r':
             break
+
+
     
 
 # for i in PCU_index:

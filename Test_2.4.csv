@@ -1,0 +1,6 @@
+step,ncycles,description,Exit condition,Value,Grid sim on_off,GridSimV,GridSimF,slew_rate,grid_relay,load_relay,e_load_W,eload_VAr,PV1_W,PV2_W,PV3_W,PV4_W,PV5_W,PV6_W
+0,1,Charge until 98,SOC>=,97,1,230,50,1000,1,0,0,0,0,0,0,0,0,0
+1,1,grid off + load on,SOC<,96,0,230,50,1000,1,1,0,0,0,0,0,0,0,0
+2,1,grid on + load off,SOC>=,97,1,230,50,1000,1,0,0,0,0,0,0,0,0,0
+3,1,grid off + load on,SOC<,96,0,230,50,1000,1,1,0,0,0,0,0,0,0,0
+4,1,grid off and No load + wait 5 min,Timer,300,0,230,50,1000,1,0,0,0,0,0,0,0,0,0
