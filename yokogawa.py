@@ -5,18 +5,30 @@ import sys
 import wt1600 as yoko
 import os
 
-
 term = '\n'
 chunksize = 20480
-try:
-    s = yoko.init('192.168.128.204')
-except:
-    print("Failed to inialize using socket with FTP")
+
+# Access the command-line argument
+if len(sys.argv) > 1:
+    filename = sys.argv[1]
+else:
+    print("No filename provided")
+    sys.exit()
+
+for i in range(0,5):
     try:
-        s = yoko.init('192.168.128.204', True)
+        s = yoko.init('192.168.128.204')
+        break
     except:
-        print("Failed to inialize using socket with no_FTP")
-        sys.exit()
+        print("Failed to inialize using socket with FTP")
+        try:
+            s = yoko.init('192.168.128.204', True)
+            break
+        except:
+            print("Failed to inialize using socket with no_FTP")
+    i+=1
+if(i==4):
+    sys.exit()
 
 try:
     yoko.query(s, ('*RST"' + term))
@@ -33,20 +45,24 @@ except Exception as e:
     s.close()
     sys.exit()
 
-filename= 'Yokogawa_' + str(dt.now().strftime("%Y%m%d.%H%M%S"))
-if not os.path.exists('./'+filename):
-    os.mkdir('./'+filename)
+folderName= 'Yokogawa_' + filename + str(dt.now().strftime("DATE_%Y_%m_%d.TIME_%H_%M_%S"))
+if not os.path.exists('./'+folderName):
+    os.mkdir('./'+folderName)
 for j in range(1,7):
     # Open a text file in append and read mode
-    with open('./'+filename +'/ch'+str(j)+ ".csv", "a+") as f:
+    with open('./'+folderName +'/ch'+str(j)+ ".csv", "a+") as f:
         f.write("Timestamp,URMS,UMN,UDC,UAC,IRMS,IMN,IDC,IAC,P,S,Q,LAMB,PHI,FU,FI")
+#sys.stdout.readline("Successfully connected to Yokogawa")
 
-print("Press Enter to end program...")
+print("Successfully connected to Yokogawa", flush=True)
+#sys.fflush(sys.stdout)
+
 while True:
     for j in range(1,7):
         # Open a text file in append and read mode
-        with open('./'+filename +'/ch'+str(j)+ ".csv", "a+") as f:
-            f.write("\n"+str(dt.now().strftime("%Y%m%d.%H%M%S")))
+        with open('./'+folderName +'/ch'+str(j)+ ".csv", "a+") as f:
+            # The ISO 8601 format is "YYYY-MM-DDTHH:MM:SS"
+            f.write("\n" + dt.now().strftime("%Y-%m-%dT%H:%M:%S"))
             f.write(str(yoko.get_data(s,j)))
             #print(data)
             # Write to the end of the file
@@ -62,5 +78,3 @@ while True:
 print("Closing socket interface to Yokogawa...")
 s.close()
 time.sleep(5)
-
-

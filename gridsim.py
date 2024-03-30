@@ -69,7 +69,7 @@ try:
     print(query('VOLT:SLEW:IMMEDIATE?'))
 
     #output on
-    query('OUTP 1')
+    #query('OUTP 1')
 
     #prints output volts
     print(query('MEAS:VOLT:AC?'))
@@ -77,7 +77,7 @@ try:
     query('inst:coup all')
     
     #output off
-    #query('OUTP:IMM 0')
+    query('OUTP:IMM 0')
     
     time.sleep(5)
 
@@ -85,7 +85,7 @@ try:
     print(query('VOLT?'))
 
     #re-enables local interface
-    #query('++loc')
+    query('++loc')
 
 except Exception as e:
     print("Error while trying to communicate with MX45")
@@ -93,5 +93,5 @@ except Exception as e:
     s.close()
     sys.exit()
 
-input("Press enter to continue...")
+input("Press enter to close socket...")
 s.close()

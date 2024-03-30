@@ -8,9 +8,11 @@ import socket
 import subprocess
 import urllib3
 import json
+import subprocess
+from subprocess import Popen, PIPE
 
 term = '\n'
-filename='Test_2.2'
+filename='SOC_Test'
 gridsim_present=1
 edge_pcu=['4000100158','4000100104','4000100323','4000100247','4000100142']
 http1 = urllib3.PoolManager()
@@ -19,6 +21,15 @@ http1 = urllib3.PoolManager()
 if not os.path.exists('./'+filename):
     os.mkdir('./'+filename)
 
+#Create logger object.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler('./'+filename+'/'+filename+'_'+str(dt.datetime.now().strftime("%Y%m%d.%H%M%S"))+".log"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 def main():
     #filename = sys.argv[1:]
@@ -27,36 +38,31 @@ def main():
     try:
         #Import the testing sequence.
         df=pd.read_csv(str('./'+filename+".csv"),header=[0])
-        ##    for index,row in df.iterrows():
-        ##        logging.info(row)
-        '''
-        try:
-            subprocess.run(["python.exe", "yokogawa.py", "&"])
-        except Exception as e:
-            print("Error while trying to open test sequence")
-            print(e)
-            sys.exit()'''
-        #subprocess.run(["python.exe", "REST_API.py"])
         
+        try:
+            env = os.environ
+            apiProc = Popen(['python.exe', 'REST_API.py'], stdin=PIPE, shell=True, env=env)
+            yokoProc = Popen(['python.exe', 'yokogawa.py'], stdin=PIPE, shell=True, env=env)
+        except Exception as e:
+            print("Error while trying to run loggers")
+            print(e)
+            sys.exit()
+
         testFramework(df)
+
+        apiProc.communicate(input='\n')
+        apiProc.terminate()
+
+        yokoProc.communicate(input='\n')
+        yokoProc.terminate()
+
     except Exception as e:
         print("Error while trying to open test sequence")
         print(e)
         sys.exit()
 
-
-#Create logger object.
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler('./'+filename+'/'+filename+str(dt.datetime.now().strftime("%Y%m%d.%H%M%S"))+".log"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-
 #Gridsim query function
-def query(msg: bytes, debug = False):
+def query(msg: str, debug = False):
     cmd = bytes((msg+term).encode('utf-8'))
     instrument.send(cmd)
     if debug: print("trying to send " +str(cmd))
@@ -320,10 +326,17 @@ def testFramework(df, testncycles=1):
                         logging.info('-------------')
                         logging.info('')
     query('OUTP:IMM OFF')
+    logging.info("Turned off MX45 output")
     query('++loc')
+    logging.info("Setting MX45 to local mode")
+    instrument.close()
+    logging.info("Closed MX45 socket")
+    
     subprocess.run(["python.exe", "relayScript.py", "-0", "1"])
+    logging.info("Opened gridsim relay")
+    
     subprocess.run(["python.exe", "relayScript.py", "-0", "3"])
-
+    logging.info("Opened eload relay")
 
 
 if __name__ == "__main__":
