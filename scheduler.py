@@ -109,6 +109,10 @@ def main():
         sys.exit()
 
     try:
+        logging.info("resolving edge devices names")
+        for pcu_id in edge_pcu:
+            getDeviceStatus(pcu_id)
+
         testFramework(df,1)
     except Exception as e:
         print("Error while trying to open test sequence")
@@ -221,12 +225,55 @@ def postRawCommand(cmd, pcu_id):
         }
     )
 
+def getGeneralStatus(pcu_id):
+    try:
+        resp = getDeviceStatus(pcu_id)
+    except Exception as e:
+        logging.error("Error while querying edge-" + pcu_id)
+        logging.error(e)
+    try:
+        resp_obj = json.loads(resp.data)
+    except Exception as e:
+        logging.error("Error parsing response json data.")
+        logging.error(e)
+    return resp_obj['data']['status']['general_status'][1]
+
+def getFaultMode(pcu_id):
+    try:
+        resp = postRawCommand("QPGSn", pcu_id)
+    except Exception as e:
+        logging.error("Error qhile querying edge-" + pcu_id)
+        logging.error(e)
+    try:
+        resp_obj = json.loads(resp.data)
+    except Exception as e:
+        logging.error("Error parsing response json data.")
+        logging.error(e)
+    try:
+        fault_mode = str(resp_obj['response']).split()[3]
+    except Exception as e:
+        logging.error("Error parsing response data.")
+        logging.error("Data is: " + str(resp_obj))
+        logging.error(e)
+    
+    return fault_mode
+
+
 def checkExitCondition(exit_type, exit_value, ):
     if str(exit_type).lower().replace(' ','')=='timer':
         logging.info('Checking timer condition')
         starttime = time.time()
         while time.time()-starttime<exit_value:
-            logging.info('Timer: '+str(round(time.time()-starttime,2))+' out of '+str(exit_value))
+            battery_v_sum = 0
+            fault_modes = []
+            for pcu_id in edge_pcu:
+                status = getGeneralStatus(pcu_id)
+                battery_v_sum += status['battery_voltage']
+                fault_modes.append(getFaultMode(pcu_id))
+
+            battery_average = battery_v_sum/len(edge_pcu)
+            logging.info("Battery V average: " + str(battery_average))
+            logging.info("Fault modes: " + str(fault_modes))
             time.sleep(1)
         return 
     
@@ -243,10 +290,9 @@ def checkExitCondition(exit_type, exit_value, ):
                     logging.info("Error while trying to query Edge system\n")
                     logging.info(e)
                     continue
-                edge_status=[]
                 try:
-                    edge_status.append(json.loads(resp.data))
-                    edge_bat_v=(edge_status[0]['data']['status']['general_status'][1]['battery_voltage'])
+                    edge_status=json.loads(resp.data)
+                    edge_bat_v=edge_status['data']['status']['general_status'][1]['battery_voltage']
                     logging.info(edge_bat_v)
                     average_bat_v+=edge_bat_v
                     logging.info(average_bat_v)
