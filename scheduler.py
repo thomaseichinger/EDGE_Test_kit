@@ -13,9 +13,26 @@ from pvsim import pv_sim
 from multiprocessing import Process
 
 
-filename='Test_2.1'
+filename='Test_0.1'
 gridsim_present=1
-edge_pcu=['4000100158','4000100104','4000100323','4000100247','4000100142']
+edge_pcu=[
+    '4000100158',
+    '4000100104',
+    '4000100323',
+    '4000100247',
+    '4000100142'
+]
+
+pv_ips=[
+    '192.168.128.243',
+    '192.168.128.219',
+    '192.168.128.211',
+    '192.168.128.191',
+    '192.168.128.185'
+]
+
+gridsim_ips=['192.168.128.245']
+
 http1 = urllib3.PoolManager()
 
 #Create directory for test case.
@@ -32,17 +49,17 @@ logging.basicConfig(
     ]
 )
 try:
-    pv1=pv_sim('192.168.128.243', 30000, 'ITECH')
+    pv1=pv_sim(pv_ips[0], 30000, 'ITECH')
     pv1.connect()
-    pv2=SCPI_interface('192.168.128.219', 30000, 'ITECH')
+    pv2=SCPI_interface(pv_ips[1], 30000, 'ITECH')
     pv2.connect()
-    pv3=SCPI_interface('192.168.128.211', 30000, 'ITECH')
+    pv3=SCPI_interface(pv_ips[2], 30000, 'ITECH')
     pv3.connect()
-    pv4=SCPI_interface('192.168.128.191', 30000, 'ITECH')
+    pv4=SCPI_interface(pv_ips[3], 30000, 'ITECH')
     pv4.connect()
-    pv5=SCPI_interface('192.168.128.185', 30000, 'ITECH')
+    pv5=SCPI_interface(pv_ips[4], 30000, 'ITECH')
     pv5.connect()
-    gridsim=SCPI_interface('192.168.128.245', 1234, 'MX45')
+    gridsim=SCPI_interface(gridsim_ips[0], 1234, 'MX45')
     gridsim.connect()
 except Exception as e:
     logging.info("Failed to establish SCPI connections")
@@ -92,7 +109,7 @@ def main():
         sys.exit()
 
     try:
-        testFramework(df,10)
+        testFramework(df,1)
     except Exception as e:
         print("Error while trying to open test sequence")
         print(e)
@@ -185,6 +202,25 @@ def grid_sim_write(on_off,ACDC,v,f,slew):
         logging.info('Grid Sim ON')
         gridsim.query('OUTP ON')
 
+def getDeviceStatus(pcu_id):
+    return http1.request(
+        method="GET",
+        url="http://edge-" + pcu_id + ":4000/api/device/status"
+    )
+
+def postRawCommand(cmd, pcu_id):
+    return http1.request(
+        method="POST",
+        url="http://edge-" + pcu_id + ":4000/api/device/raw_command",
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        json={
+            "command": cmd
+        }
+    )
+
 def checkExitCondition(exit_type, exit_value, ):
     if str(exit_type).lower().replace(' ','')=='timer':
         logging.info('Checking timer condition')
@@ -201,11 +237,8 @@ def checkExitCondition(exit_type, exit_value, ):
             time.sleep(5)
             average_bat_v = 0
             for pcu_id in edge_pcu:
-                #print(pcu_id + '\n')
-                url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
-                logging.info(url)
                 try:
-                    resp = http1.request('GET', url)
+                    resp = getDeviceStatus(pcu_id)
                 except Exception as e:
                     logging.info("Error while trying to query Edge system\n")
                     logging.info(e)
@@ -231,11 +264,8 @@ def checkExitCondition(exit_type, exit_value, ):
             time.sleep(5)
             average_bat_v = 0
             for pcu_id in edge_pcu:
-                #print(pcu_id + '\n')
-                url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
-                logging.info(url)
                 try:
-                    resp = http1.request('GET', url)
+                    resp = getDeviceStatus(pcu_id)
                 except Exception as e:
                     logging.info("Error while trying to query Edge system\n")
                     logging.info(e)
@@ -261,11 +291,8 @@ def checkExitCondition(exit_type, exit_value, ):
             time.sleep(5)
             average_SOC = 0
             for pcu_id in edge_pcu:
-                #print(pcu_id + '\n')
-                url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
-                logging.info(url)
                 try:
-                    resp = http1.request('GET', url)
+                    resp = getDeviceStatus(pcu_id)
                 except Exception as e:
                     logging.info("Error while trying to query Edge system\n")
                     logging.info(e)
@@ -291,11 +318,8 @@ def checkExitCondition(exit_type, exit_value, ):
             time.sleep(5)
             average_SOC = 0
             for pcu_id in edge_pcu:
-                #print(pcu_id + '\n')
-                url = str('http://edge-'+str(pcu_id)+ ':4000/api/device/status')
-                logging.info(url)
                 try:
-                    resp = http1.request('GET', url)
+                    resp = getDeviceStatus(pcu_id)
                 except Exception as e:
                     logging.info("Error while trying to query Edge system\n")
                     logging.info(e)
