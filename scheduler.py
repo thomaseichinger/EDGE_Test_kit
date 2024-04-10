@@ -11,9 +11,11 @@ import json
 from SCPI_interface import SCPI_interface
 from pvsim import pv_sim
 from multiprocessing import Process
+import csv
 
 
-filename='Test_0.1'
+#filename='Test_0.1'
+filename='Test_2.3'
 gridsim_present=1
 edge_pcu=[
     '4000100158',
@@ -33,6 +35,26 @@ pv_ips=[
 
 gridsim_ips=['192.168.128.245']
 
+fields_per_device = [
+    'output_source_priority',   #ratings
+    'charger_source_priority',  #ratings
+    'ac_output_voltage',        #general_status
+    'ac_output_frequency',      #general_status
+    'max_ac_charging_current',  #ratings
+    'ac_input_current',         #general_status2
+    'battery_charging_current', #general_status
+    'ac_input_active_power',    #general_status2
+    'ac_output_active_power',   #general_status
+    'pv1_input_current',        #general_status
+    'mode',                     #mode
+    'fault_mode'                #QPGSn raw command
+]
+fieldnames = [
+    'time', 
+    'pv1_input_current_sum', 
+    'pv1_input_current_avg'
+]
+
 http1 = urllib3.PoolManager()
 
 #Create directory for test case.
@@ -48,6 +70,11 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout)
     ]
 )
+
+#Create CSV write object
+csv_filename_and_path = "./"+filename+"/"+filename+str(dt.datetime.now().strftime("DATE_%Y_%m_%d.TIME_%H_%M_%S"))+".csv"
+csvfile = open(csv_filename_and_path, 'w', newline='')
+
 try:
     pv1=pv_sim(pv_ips[0], 30000, 'ITECH')
     pv1.connect()
@@ -207,10 +234,20 @@ def grid_sim_write(on_off,ACDC,v,f,slew):
         gridsim.query('OUTP ON')
 
 def getDeviceStatus(pcu_id):
-    return http1.request(
+    try:
+        resp = http1.request(
         method="GET",
         url="http://edge-" + pcu_id + ":4000/api/device/status"
-    )
+        )
+    except Exception as e:
+        logging.error("Error while querying edge-" + pcu_id)
+        logging.error(e)
+    try:
+        resp_obj = json.loads(resp.data)
+    except Exception as e:
+        logging.error("Error parsing response json data.")
+        logging.error(e)
+    return resp_obj
 
 def postRawCommand(cmd, pcu_id):
     return http1.request(
@@ -226,17 +263,20 @@ def postRawCommand(cmd, pcu_id):
     )
 
 def getGeneralStatus(pcu_id):
-    try:
-        resp = getDeviceStatus(pcu_id)
-    except Exception as e:
-        logging.error("Error while querying edge-" + pcu_id)
-        logging.error(e)
-    try:
-        resp_obj = json.loads(resp.data)
-    except Exception as e:
-        logging.error("Error parsing response json data.")
-        logging.error(e)
+    resp_obj = getDeviceStatus(pcu_id)
     return resp_obj['data']['status']['general_status'][1]
+
+def getGeneralStatus2(pcu_id):
+    resp_obj = getDeviceStatus(pcu_id)
+    return resp_obj['data']['status']['general_status_2'][1]
+
+def getRatings(pcu_id):
+    resp_obj = getDeviceStatus(pcu_id)
+    return resp_obj['data']['status']['ratings'][1]
+
+def getMode(pcu_id):
+    resp_obj = getDeviceStatus(pcu_id)
+    return resp_obj['data']['status']['mode'][1]
 
 def getFaultMode(pcu_id):
     try:
@@ -258,22 +298,54 @@ def getFaultMode(pcu_id):
     
     return fault_mode
 
+def exit_condition_sum_up(general_status, field=None, accumulator=None):
+    if field != None:
+        return accumulator + general_status[field]
 
-def checkExitCondition(exit_type, exit_value, ):
+def exit_condition(accumulator=None):
+    if accumulator != None:
+        return accumulator/len(edge_pcu)
+
+def log_measurement(csvwriter, exit_condition_field=None):
+    pv1_input_current_sum = 0
+    exit_condition_accumulator = 0
+    csv_dict = {"time": dt.datetime.now().isoformat()}
+    for pcu_id in edge_pcu:
+        general_status = getGeneralStatus(pcu_id)
+        general_status_2 = getGeneralStatus2(pcu_id)
+        ratings = getRatings(pcu_id)
+        mode = getMode(pcu_id)
+        try:
+            csv_dict[pcu_id + " output_source_priority"] = ratings['output_source_priority']
+            csv_dict[pcu_id + " charger_source_priority"] = ratings['charger_source_priority']
+            csv_dict[pcu_id + " max_ac_charging_current"] = ratings['max_ac_charging_current']
+            csv_dict[pcu_id + " mode"] = mode
+            csv_dict[pcu_id + " ac_output_voltage"] = general_status['ac_output_voltage']
+            csv_dict[pcu_id + " ac_output_frequency"] = general_status['ac_output_frequency']
+            csv_dict[pcu_id + " battery_charging_current"] = general_status['battery_charging_current']
+            csv_dict[pcu_id + " ac_output_active_power"] = general_status['ac_output_active_power']
+            csv_dict[pcu_id + " ac_input_current"] = general_status_2['ac_input_current']
+            csv_dict[pcu_id + " ac_input_active_power"] = general_status_2['ac_input_active_power']
+            csv_dict[pcu_id + " fault_mode"] = getFaultMode(pcu_id)
+            csv_dict[pcu_id + " pv1_input_current"] = general_status['pv1_input_current']
+            pv1_input_current_sum += general_status['pv1_input_current']
+        except Exception as e:
+            logging.error("ERROR: Exception processing data")
+            logging.error(e)
+        exit_condition_accumulator = exit_condition_sum_up(general_status, exit_condition_field, exit_condition_accumulator)
+    csv_dict['pv1_input_current_avg'] = pv1_input_current_sum/len(edge_pcu)
+    csv_dict['pv1_input_current_sum'] = pv1_input_current_sum
+    csvwriter.writerow(csv_dict)
+    csvfile.flush()
+    return exit_condition(exit_condition_accumulator)
+
+
+def checkExitCondition(exit_type, exit_value, csvwriter):
     if str(exit_type).lower().replace(' ','')=='timer':
         logging.info('Checking timer condition')
         starttime = time.time()
         while time.time()-starttime<exit_value:
-            battery_v_sum = 0
-            fault_modes = []
-            for pcu_id in edge_pcu:
-                status = getGeneralStatus(pcu_id)
-                battery_v_sum += status['battery_voltage']
-                fault_modes.append(getFaultMode(pcu_id))
-
-            battery_average = battery_v_sum/len(edge_pcu)
-            logging.info("Battery V average: " + str(battery_average))
-            logging.info("Fault modes: " + str(fault_modes))
+            log_measurement(csvwriter)
             time.sleep(1)
         return 
     
@@ -282,107 +354,32 @@ def checkExitCondition(exit_type, exit_value, ):
         logging.info('Checking Battery voltage condition')
         while average_bat_v < exit_value:
             time.sleep(5)
-            average_bat_v = 0
-            for pcu_id in edge_pcu:
-                try:
-                    resp = getDeviceStatus(pcu_id)
-                except Exception as e:
-                    logging.info("Error while trying to query Edge system\n")
-                    logging.info(e)
-                    continue
-                try:
-                    edge_status=json.loads(resp.data)
-                    edge_bat_v=edge_status['data']['status']['general_status'][1]['battery_voltage']
-                    logging.info(edge_bat_v)
-                    average_bat_v+=edge_bat_v
-                    logging.info(average_bat_v)
-                except Exception as e:
-                    logging.info("Error while trying to read response data\n")
-                    logging.info(e)
-                    continue
-            average_bat_v = average_bat_v/len(edge_pcu)
-            logging.info(average_bat_v)
+            average_bat_v = log_measurement(csvwriter, 'battery_voltage')
+            logging.info("average_bat_v: " + str(average_bat_v))
         return
     elif 'Bat Voltage<' in str(exit_type):
-        average_bat_v = 60
+        average_bat_v = 101
         logging.info('Checking Battery voltage condition')
         while average_bat_v > exit_value:
             time.sleep(5)
-            average_bat_v = 0
-            for pcu_id in edge_pcu:
-                try:
-                    resp = getDeviceStatus(pcu_id)
-                except Exception as e:
-                    logging.info("Error while trying to query Edge system\n")
-                    logging.info(e)
-                    continue
-                edge_status=[]
-                try:
-                    edge_status.append(json.loads(resp.data))
-                    edge_bat_v=(edge_status[0]['data']['status']['general_status'][1]['battery_voltage'])
-                    logging.info(edge_bat_v)
-                    average_bat_v+=edge_bat_v
-                    logging.info(average_bat_v)
-                except Exception as e:
-                    logging.info("Error while trying to read response data\n")
-                    logging.info(e)
-                    continue
-            average_bat_v = average_bat_v/len(edge_pcu)
-            logging.info(average_bat_v)
+            average_bat_v = log_measurement(csvwriter, 'battery_voltage')
+            logging.info("average_bat_v: " + str(average_bat_v))
         return
     elif 'SOC>' in str(exit_type):
         average_SOC = 0
         logging.info('Checking Battery charge condition')
         while average_SOC < exit_value:
             time.sleep(5)
-            average_SOC = 0
-            for pcu_id in edge_pcu:
-                try:
-                    resp = getDeviceStatus(pcu_id)
-                except Exception as e:
-                    logging.info("Error while trying to query Edge system\n")
-                    logging.info(e)
-                    continue
-                edge_status=[]
-                try:
-                    edge_status.append(json.loads(resp.data))
-                    edge_SOC=(edge_status[0]['data']['status']['general_status'][1]['battery_capacity'])
-                    logging.info(edge_SOC)
-                    average_SOC+=edge_SOC
-                    logging.info(average_SOC)
-                except Exception as e:
-                    logging.info("Error while trying to read response data\n")
-                    logging.info(e)
-                    continue
-            average_SOC = average_SOC/len(edge_pcu)
-            logging.info(average_SOC)
+            average_SOC = log_measurement(csvwriter, 'battery_capacity')
+            logging.info("Average SoC: " + str(average_SOC))
         return
     elif 'SOC<' in str(exit_type):
         average_SOC = 101
         logging.info('Checking Battery charge condition')
         while average_SOC > exit_value:
             time.sleep(5)
-            average_SOC = 0
-            for pcu_id in edge_pcu:
-                try:
-                    resp = getDeviceStatus(pcu_id)
-                except Exception as e:
-                    logging.info("Error while trying to query Edge system\n")
-                    logging.info(e)
-                    continue
-                edge_status=[]
-                try:
-                    edge_status.append(json.loads(resp.data))
-                    edge_SOC=(edge_status[0]['data']['status']['general_status'][1]['battery_capacity'])
-                    logging.info(edge_SOC)
-                    average_SOC+=edge_SOC
-                    logging.info(average_SOC)
-                except Exception as e:
-                    logging.info("Error while trying to read response data\n")
-                    logging.info(e)
-                    continue
-            average_SOC = average_SOC/len(edge_pcu)
-            logging.info(average_SOC)
+            average_SOC = log_measurement(csvwriter, 'battery_capacity')
+            logging.info("Average SoC: " + str(average_SOC))
         return
 
 #Test framework
@@ -391,6 +388,17 @@ def testFramework(df, testncycles=1):
         logging.info("")
         logging.info('Initializing test '+str(k+1))
         logging.info("")
+        
+        logging.info('Setting up .csv file.')
+        logging.info(csv_filename_and_path)
+
+        for pcu_id in edge_pcu:
+            tmp = [pcu_id + " " + field for field in fields_per_device]
+            print(str(tmp))
+            fieldnames.extend(tmp)
+
+        csvwriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        csvwriter.writeheader()
         ##
         for sub_df in df.groupby('step'):
             ncycles=int(sub_df[1].iloc[0,1])
@@ -464,12 +472,7 @@ def testFramework(df, testncycles=1):
                         exit_value=row['Value']
                         logging.info('Starting condition checking')
 
-                        checkExitCondition(exit_type, exit_value)
-                            
-                        logging.info('Exit Condition met, going to next step.')
-                        logging.info('')
-                        logging.info('-------------')
-                        logging.info('')
+                        checkExitCondition(exit_type, exit_value, csvwriter)
 
     gridsim.query('OUTP:IMM OFF')
     logging.info("Turned off MX45 output")
