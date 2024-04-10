@@ -1,3 +1,4 @@
 Yokogawa_*
 *.log
 __pycache__
+Test*/
