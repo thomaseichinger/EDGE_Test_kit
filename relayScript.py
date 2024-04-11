@@ -52,7 +52,7 @@ def flipper(command:int, relayNum:int):
 
 def main():
     args = sys.argv[1:]
-    if len(args) != 2 or int(args[1]) < 1 or int(args[1]) > 8:
+    if (len(args) != 2 or int(args[1]) < 1 or int(args[1]) > 8) and args[0] != '-gridflip':
         print("Incorrect args try again: relayScript.py [-1|-0] [1-8]")
         sys.exit()
     if args[0] == '-1': #close relay
@@ -60,7 +60,11 @@ def main():
     elif args[0] == '-0':   #open relay
         flipper(0x00, args[1])
     elif args[0] == '-f':   #flip relay
-        flipper(0x55,args[1])         
+        flipper(0x55,args[1])
+    elif args[0] == '-gridflip':
+        for i in range(0,200):
+            flipper(0x55, 1)
+            time.sleep(5)
 
 if __name__ == "__main__":
     main()
