@@ -148,7 +148,6 @@ def main():
     except Exception as e:
         print("Error while trying to open test sequence")
         print(e)
-        sys.exit()
 
     try:
         apiProc.kill()
