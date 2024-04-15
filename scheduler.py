@@ -14,8 +14,9 @@ from multiprocessing import Process
 import csv
 
 
-#filename='Test_0.1'
-filename='Test_2.3'
+# filename='Test_0.1.csv'
+filename='ETR002/ETC005.csv'
+
 gridsim_present=1
 edge_pcu=[
     '4000100158',
@@ -57,22 +58,25 @@ fieldnames = [
 
 http1 = urllib3.PoolManager()
 
+outfile=os.path.basename(filename)
+outdir=os.path.dirname(filename) + '/' + os.path.splitext(outfile)[0]
+
 #Create directory for test case.
-if not os.path.exists('./'+filename):
-    os.mkdir('./'+filename)
+if not os.path.exists('./'+outdir):
+    os.makedirs('./'+outdir)
 
 #Create logger object.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler('./'+filename+'/'+filename+str(dt.datetime.now().strftime("DATE_%Y_%m_%d.TIME_%H_%M_%S"))+".log"),
+        logging.FileHandler('./'+outdir+'/'+outfile+str(dt.datetime.now().strftime("DATE_%Y_%m_%d.TIME_%H_%M_%S"))+".log"),
         logging.StreamHandler(sys.stdout)
     ]
 )
 
 #Create CSV write object
-csv_filename_and_path = "./"+filename+"/"+filename+str(dt.datetime.now().strftime("DATE_%Y_%m_%d.TIME_%H_%M_%S"))+".csv"
+csv_filename_and_path = "./"+outdir+"/"+outfile+str(dt.datetime.now().strftime("DATE_%Y_%m_%d.TIME_%H_%M_%S"))+".csv"
 csvfile = open(csv_filename_and_path, 'w', newline='')
 
 try:
@@ -114,7 +118,7 @@ def main():
     #    testncycles = sys.argv[2:]
     try:
         #Import the testing sequence.
-        df=pd.read_csv(str('./'+filename+".csv"),header=[0])
+        df=pd.read_csv(str('./'+filename),header=[0])
     except Exception as e:
         print("Error while trying to open test sequence")
         print(e)
