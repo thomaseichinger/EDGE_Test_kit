@@ -15,7 +15,7 @@ import csv
 
 
 # filename='Test_0.1.csv'
-filename='ETR002/ETC001.csv'
+filename='ETR002/ETC005.csv'
 
 gridsim_present=1
 edge_pcu=[
@@ -297,6 +297,7 @@ def getFaultMode(pcu_id):
         fault_mode = str(resp_obj['response']).split()[3]
     except Exception as e:
         logging.error("Error parsing response data.")
+        logging.error("pcu_id is: " + pcu_id)
         logging.error("Data is: " + str(resp_obj))
         logging.error(e)
     
