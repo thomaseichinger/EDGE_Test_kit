@@ -15,7 +15,7 @@ import csv
 
 
 # filename='Test_0.1.csv'
-filename='ETR002/ETC005.csv'
+filename='ETR002/ETC001.csv'
 
 gridsim_present=1
 edge_pcu=[
@@ -51,6 +51,7 @@ fields_per_device = [
     'fault_mode'                #QPGSn raw command
 ]
 fieldnames = [
+    'step',
     'time', 
     'pv1_input_current_sum', 
     'pv1_input_current_avg'
@@ -127,7 +128,7 @@ def main():
     try:
         env = os.environ            
         logging.info("Starting yokogawa logger")
-        yokoProc = Popen(['python.exe', 'yokogawa.py', filename], stdout=PIPE)
+        yokoProc = Popen(['python.exe', 'yokogawa.py', os.path.splitext(outfile)[0]], stdout=PIPE)
         logging.info("Waiting for yokogawa logger to respond")
         logging.info(yokoProc.stdout.readline(1))
         logging.info("Starting REST_API logger")
@@ -309,10 +310,13 @@ def exit_condition(accumulator=None):
     if accumulator != None:
         return accumulator/len(edge_pcu)
 
-def log_measurement(csvwriter, exit_condition_field=None):
+def log_measurement(step, csvwriter, exit_condition_field=None):
     pv1_input_current_sum = 0
     exit_condition_accumulator = 0
-    csv_dict = {"time": dt.datetime.now().isoformat()}
+    csv_dict = {
+                "step": step,
+                "time": dt.datetime.now().isoformat()
+                }
     for pcu_id in edge_pcu:
         general_status = getGeneralStatus(pcu_id)
         general_status_2 = getGeneralStatus2(pcu_id)
@@ -343,12 +347,12 @@ def log_measurement(csvwriter, exit_condition_field=None):
     return exit_condition(exit_condition_accumulator)
 
 
-def checkExitCondition(exit_type, exit_value, csvwriter):
+def checkExitCondition(step, exit_type, exit_value, csvwriter):
     if str(exit_type).lower().replace(' ','')=='timer':
         logging.info('Checking timer condition')
         starttime = time.time()
         while time.time()-starttime<exit_value:
-            log_measurement(csvwriter)
+            log_measurement(step, csvwriter, None)
             time.sleep(1)
         return 
     
@@ -357,7 +361,7 @@ def checkExitCondition(exit_type, exit_value, csvwriter):
         logging.info('Checking Battery voltage condition')
         while average_bat_v < exit_value:
             time.sleep(5)
-            average_bat_v = log_measurement(csvwriter, 'battery_voltage')
+            average_bat_v = log_measurement(step, csvwriter, 'battery_voltage')
             logging.info("average_bat_v: " + str(average_bat_v))
         return
     elif 'Bat Voltage<' in str(exit_type):
@@ -365,7 +369,7 @@ def checkExitCondition(exit_type, exit_value, csvwriter):
         logging.info('Checking Battery voltage condition')
         while average_bat_v > exit_value:
             time.sleep(5)
-            average_bat_v = log_measurement(csvwriter, 'battery_voltage')
+            average_bat_v = log_measurement(step, csvwriter, 'battery_voltage')
             logging.info("average_bat_v: " + str(average_bat_v))
         return
     elif 'SOC>' in str(exit_type):
@@ -373,7 +377,7 @@ def checkExitCondition(exit_type, exit_value, csvwriter):
         logging.info('Checking Battery charge condition')
         while average_SOC < exit_value:
             time.sleep(5)
-            average_SOC = log_measurement(csvwriter, 'battery_capacity')
+            average_SOC = log_measurement(step, csvwriter, 'battery_capacity')
             logging.info("Average SoC: " + str(average_SOC))
         return
     elif 'SOC<' in str(exit_type):
@@ -407,12 +411,12 @@ def testFramework(df, testncycles=1):
             ncycles=int(sub_df[1].iloc[0,1])
             for j in range(ncycles):
                 for index,row in sub_df[1].iterrows():
-                    #if row['step']>5:                
+                    step = row['step']             
                     if True:
                         logging.info('-------------')
                         logging.info('')
                         logging.info(dt.datetime.now().strftime("%H:%M:%S"))
-                        logging.info('STEP '+str(row['step'])+' - '+str(row['description'])+' - Iteration '+str(j+1))
+                        logging.info('STEP '+str(step)+' - '+str(row['description'])+' - Iteration '+str(j+1))
 
 
                         logging.info('')
@@ -475,7 +479,7 @@ def testFramework(df, testncycles=1):
                         exit_value=row['Value']
                         logging.info('Starting condition checking')
 
-                        checkExitCondition(exit_type, exit_value, csvwriter)
+                        checkExitCondition(step, exit_type, exit_value, csvwriter)
 
     gridsim.query('OUTP:IMM OFF')
     logging.info("Turned off MX45 output")
