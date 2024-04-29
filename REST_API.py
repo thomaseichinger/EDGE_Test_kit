@@ -86,7 +86,7 @@ while True:
 
     
 
- for i in PCU_index:
-     qpiri_data.append(edge_status[int(i)]['data']['status']['ratings'][1])
-     genctl_data.append(edge_genctl[int(i)]['data']['config'])
-     osp_data.append(edge_osp[int(i)]['data']['config'])
+# for i in PCU_index:
+#      qpiri_data.append(edge_status[int(i)]['data']['status']['ratings'][1])
+#      genctl_data.append(edge_genctl[int(i)]['data']['config'])
+#      osp_data.append(edge_osp[int(i)]['data']['config'])

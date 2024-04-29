@@ -15,16 +15,22 @@ import csv
 
 
 # filename='Test_0.1.csv'
-filename='ETR002/ETC005.csv'
+filename='ETR002/ETC001_grid_relay_always_on.csv'
 
 gridsim_present=1
+# edge_pcu=[
+#     '4000100158',
+#     '4000100104',
+#     '4000100323',
+#     '4000100247',
+#     '4000100142'
+# ]
+
 edge_pcu=[
-    '4000100158',
-    '4000100104',
-    '4000100323',
-    '4000100247',
-    '4000100142'
+    '4000100388',
+    '4000100237'
 ]
+master_pcu = edge_pcu[0]
 
 pv_ips=[
     '192.168.128.243',
@@ -34,17 +40,24 @@ pv_ips=[
     '192.168.128.185'
 ]
 
-gridsim_ips=['192.168.128.245']
+gridsim_ips = { 
+                'NHR9410': '192.168.128.101',   #NHR9410
+                'MX45': '192.168.128.245'       #MX45
+}
+
+gridsim_name = "NHR9410"
 
 fields_per_device = [
     'output_source_priority',   #ratings
     'charger_source_priority',  #ratings
+    'input_voltage_range',      #ratings
     'ac_output_voltage',        #general_status
     'ac_output_frequency',      #general_status
     'max_ac_charging_current',  #ratings
     'ac_input_current',         #general_status2
     'battery_charging_current', #general_status
     'ac_input_active_power',    #general_status2
+    'ac_output_current',        #general_status2
     'ac_output_active_power',   #general_status
     'pv1_input_current',        #general_status
     'mode',                     #mode
@@ -91,8 +104,15 @@ try:
     pv4.connect()
     pv5=SCPI_interface(pv_ips[4], 30000, 'ITECH')
     pv5.connect()
-    gridsim=SCPI_interface(gridsim_ips[0], 1234, 'MX45')
-    gridsim.connect()
+    if gridsim_name == "NHR9410":
+        gridsim = SCPI_interface(gridsim_ips['NHR9410'], 5025, "NH Research")
+        gridsim.connect()
+    elif gridsim_name == "MX45":
+        gridsim=SCPI_interface(gridsim_ips['MX45'], 1234, 'MX45')
+        gridsim.connect()
+    else:
+        logging.erro("Error, please set `gridsim_name` to NHR9410 or MX45")
+        exit(23)
 except Exception as e:
     logging.info("Failed to establish SCPI connections")
     logging.info(e)
@@ -132,11 +152,11 @@ def main():
         logging.info("Waiting for yokogawa logger to respond")
         logging.info(yokoProc.stdout.readline(1))
         logging.info("Starting REST_API logger")
-        apiProc = Popen(['python.exe', 'REST_API.py'], stdout=PIPE)
+        # apiProc = Popen(['python.exe', 'REST_API.py'], stdout=PIPE)
     except Exception as e:
         print("Error while trying to open loggers")
         print(e)
-        apiProc.kill()
+        # apiProc.kill()
         yokoProc.kill()
         sys.exit()
 
@@ -151,7 +171,7 @@ def main():
         print(e)
 
     try:
-        apiProc.kill()
+        # apiProc.kill()
         yokoProc.kill()
     except Exception as e:
         print("Error while trying to terminate loggers")
@@ -161,6 +181,7 @@ def main():
 #Functions and threads definition.
         
 def pv_sim_write(pv,o,v,a):
+    print(str(pv) + " " + str(o) + " " + str(v) + " " + str(a))
     try:
         pv.query('System:Clear', False)
     except Exception as e:
@@ -200,7 +221,46 @@ def pv_sim_write(pv,o,v,a):
     
 
 def grid_sim_write(on_off,ACDC,v,f,slew):
+    if gridsim_name == 'MX45':
+        grid_sim_write_mx45(on_off, ACDC, v, f, slew)
+    elif gridsim_name == 'NHR9410':
+        grid_sim_write_nhr9410(on_off, v, f, slew)
 
+def grid_sim_write_nhr9410(on_off, v, f, slew):
+    logging.info('Setting grid sim NHR 9410 with status:' + str(on_off) + ' voltage (CH1): ' + str(v))
+    logging.info('Grid Sim in AC mode, with Voltage: '+str(v)+' and Frequency: '+str(f))
+
+    # gridsim.query('INST:NSEL 2', False)
+    gridsim.query('INST:NSEL 1', False)
+
+    if(str(360) not in str(gridsim.query('VOLT:RANG?'))):
+        gridsim.query('VOLT:RANG ' + str(360), False)
+        logging.info("Successfully changed voltage range to 360")
+    logging.info(gridsim.query('VOLT:RANG?'))
+
+    if(str(f) not in str(gridsim.query('FREQ?'))):  
+        gridsim.query('FREQ ' + str(f), False)
+        logging.info("Succesfully changed Frequency")
+    logging.info(gridsim.query('FREQ?'))
+
+    if(str(v) not in str(gridsim.query('VOLT?'))):
+        gridsim.query('VOLT ' + str(v), False)
+        logging.info("Succesfully changed Volts")
+    logging.info(gridsim.query('VOLT?'))
+
+    if(str(slew) not in str(gridsim.query('VOLT:SLEW?'))):  
+        gridsim.query('VOLT:SLEW ' + str(slew), False)
+        logging.info("Successfully changed voltage slew rate")
+    logging.info(gridsim.query('VOLT:SLEW?'))
+
+    if int(on_off)==0:
+        logging.info('Grid Sim OFF')
+        gridsim.query('OUTP OFF', False)
+    elif int(on_off)==1:
+        logging.info('Grid Sim ON')
+        gridsim.query('OUTP ON', False)
+
+def grid_sim_write_mx45(on_off, ACDC, v, f, slew):
     logging.info('Setting grid sim with status:'+str(on_off)+' Voltage (CH1): '+str(v))
 
     if(str(300) not in str(gridsim.query('VOLT:RANG?'))): 
@@ -232,7 +292,6 @@ def grid_sim_write(on_off,ACDC,v,f,slew):
     if int(on_off)==0:
         logging.info('Grid Sim OFF')
         gridsim.query('OUTP:IMM OFF')
-    
     elif int(on_off)==1:
         logging.info('Grid Sim ON')
         gridsim.query('OUTP ON')
@@ -284,9 +343,9 @@ def getMode(pcu_id):
 
 def getFaultMode(pcu_id):
     try:
-        resp = postRawCommand("QPGSn", pcu_id)
+        resp = postRawCommand("QPGS" + str(edge_pcu.index(pcu_id) + 1), master_pcu)
     except Exception as e:
-        logging.error("Error qhile querying edge-" + pcu_id)
+        logging.error("Error while querying edge-" + pcu_id)
         logging.error(e)
     try:
         resp_obj = json.loads(resp.data)
@@ -297,14 +356,15 @@ def getFaultMode(pcu_id):
         fault_mode = str(resp_obj['response']).split()[3]
     except Exception as e:
         logging.error("Error parsing response data.")
-        logging.error("pcu_id is: " + pcu_id)
+        logging.error("pcu_id is: " + edge_pcu[i-1])
         logging.error("Data is: " + str(resp_obj))
         logging.error(e)
-    
+
     return fault_mode
 
 def exit_condition_sum_up(general_status, field=None, accumulator=None):
     if field != None:
+        logging.info("acc: " + str(accumulator) + " field: " + str(general_status[field]))
         return accumulator + general_status[field]
 
 def exit_condition(accumulator=None):
@@ -327,6 +387,7 @@ def log_measurement(step, csvwriter, exit_condition_field=None):
             csv_dict[pcu_id + " output_source_priority"] = ratings['output_source_priority']
             csv_dict[pcu_id + " charger_source_priority"] = ratings['charger_source_priority']
             csv_dict[pcu_id + " max_ac_charging_current"] = ratings['max_ac_charging_current']
+            csv_dict[pcu_id + " input_voltage_range"] = ratings['input_voltage_range']
             csv_dict[pcu_id + " mode"] = mode
             csv_dict[pcu_id + " ac_output_voltage"] = general_status['ac_output_voltage']
             csv_dict[pcu_id + " ac_output_frequency"] = general_status['ac_output_frequency']
@@ -334,6 +395,7 @@ def log_measurement(step, csvwriter, exit_condition_field=None):
             csv_dict[pcu_id + " ac_output_active_power"] = general_status['ac_output_active_power']
             csv_dict[pcu_id + " ac_input_current"] = general_status_2['ac_input_current']
             csv_dict[pcu_id + " ac_input_active_power"] = general_status_2['ac_input_active_power']
+            csv_dict[pcu_id + " ac_output_current"] = general_status_2['ac_output_current']
             csv_dict[pcu_id + " fault_mode"] = getFaultMode(pcu_id)
             csv_dict[pcu_id + " pv1_input_current"] = general_status['pv1_input_current']
             pv1_input_current_sum += general_status['pv1_input_current']
@@ -354,6 +416,7 @@ def checkExitCondition(step, exit_type, exit_value, csvwriter):
         starttime = time.time()
         while time.time()-starttime<exit_value:
             log_measurement(step, csvwriter, None)
+            print(str(exit_value - round(time.time()-starttime)) + " ", end='')
             time.sleep(1)
         return 
     
@@ -386,12 +449,26 @@ def checkExitCondition(step, exit_type, exit_value, csvwriter):
         logging.info('Checking Battery charge condition')
         while average_SOC > exit_value:
             time.sleep(5)
-            average_SOC = log_measurement(csvwriter, 'battery_capacity')
+            average_SOC = log_measurement(step, csvwriter, 'battery_capacity')
             logging.info("Average SoC: " + str(average_SOC))
         return
 
+def init_gridsim_config():
+    logging.info("Configuring HW Mode 7. Bussing CH1 and CH2")
+    gridsim.query("CONF:HW:MODE 7", False)
+    time.sleep(5)
+    error = gridsim.query("SYST:ERR?")
+    if "No error" not in error:
+        print(error)
+        sys.exit(23)
+    else:
+        print("CoNFIGURED")
+
+
 #Test framework
 def testFramework(df, testncycles=1):
+    init_gridsim_config()
+
     for k in range(testncycles):
         logging.info("")
         logging.info('Initializing test '+str(k+1))
@@ -482,12 +559,17 @@ def testFramework(df, testncycles=1):
 
                         checkExitCondition(step, exit_type, exit_value, csvwriter)
 
-    gridsim.query('OUTP:IMM OFF')
-    logging.info("Turned off MX45 output")
-    gridsim.query('++loc')
-    logging.info("Setting MX45 to local mode")
+    if gridsim_name == "MX45":
+        gridsim.query('OUTP:IMM OFF')
+        logging.info("Turned off MX45 output")
+        gridsim.query('++loc')
+        logging.info("Setting MX45 to local mode")
+    elif gridsim_name == "NHR9410":
+        gridsim.query('OUTP OFF', False)
+        logging.info("Turning off NHR9410 output")
+
     gridsim.close()
-    logging.info("Closed MX45 socket")
+    logging.info("Closed gridsim socket")
     
     subprocess.run(["python.exe", "relayScript.py", "-0", "1"])
     logging.info("Opened gridsim relay")

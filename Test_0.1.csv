@@ -1,3 +1,3 @@
 step,ncycles,description,Exit condition,Value,Grid sim on_off,GridSimV,GridSimF,slew_rate,grid_relay,load_relay,e_load_W,eload_VAr,PV1_O,PV1_V,PV1_A,PV2_O,PV2_V,PV2_A,PV3_O,PV3_V,PV3_A,PV4_O,PV4_V,PV4_A,PV5_O,PV5_V,PV5_A,PV6_O,PV6_V,PV6_A
-0,1,Turn OFF the grid 6 sec,Timer,6,1,230,50,1000,1,0,0,0,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30
-1,1,Turn OFF the grid 3 sec,Timer,3,0,230,50,1000,1,0,0,0,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30
+0,1,Turn ON the grid 60 sec,Timer,60,0,230,50,1000,0,0,0,0,1,350,30,1,350,30,0,0,0,0,0,0,0,0,0,0,0,0
+1,1,Turn OFF the grid 30 sec,Timer,30,0,230,50,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

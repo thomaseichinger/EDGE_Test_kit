@@ -1,0 +1,11 @@
+step,ncycles,description,Exit condition,Value,Grid sim on_off,GridSimV,GridSimF,slew_rate,grid_relay,load_relay,e_load_W,eload_VAr,PV1_O,PV1_V,PV1_A,PV2_O,PV2_V,PV2_A,PV3_O,PV3_V,PV3_A,PV4_O,PV4_V,PV4_A,PV5_O,PV5_V,PV5_A,PV6_O,PV6_V,PV6_A
+0,1,Step 0: AC input: OFF | Load: OFF | PV: OFF | Wait 10 second,Timer,10,0,230,50,1000,1,0,0,0,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30
+1,1,Step 1: AC input: OFF | Load: ON | PV: OFF | Wait 10 second,Timer,10,0,230,50,1000,1,1,0,0,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30
+2,1,Step 2: AC input: ON | Load: ON | PV: OFF | Wait 40 second,Timer,40,1,230,50,1000,1,1,0,0,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30
+3,1,Step 3: AC input: ON | Load: ON | PV: ON | Wait 10 second,Timer,10,1,230,50,1000,1,1,0,0,1,350,30,1,350,30,1,350,30,1,350,30,1,350,30,0,350,30
+4,1,Step 4: AC input: OFF | Load: ON | PV: ON | Wait 10 second,Timer,10,0,230,50,1000,1,1,0,0,1,350,30,1,350,30,1,350,30,1,350,30,1,350,30,0,350,30
+5,1,Step 5: AC input: OFF | Load: ON | PV: OFF | Wait 10 second,Timer,10,0,230,50,1000,1,1,0,0,1,350,30,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30
+6,1,Step 6: AC input: ON | Load: ON | PV: OFF | Wait 10 second,Timer,10,1,230,50,1000,1,1,0,0,1,350,30,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30
+7,1,Step 7: AC input: ON | Load: OFF | PV: OFF | Charge till 100%,SOC>=,100,1,230,50,1000,1,0,0,0,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30,0,350,30
+8,1,Step 8: AC input: ON | Load: ON | PV: ON | Wait 10 second,Timer,10,1,230,50,1000,1,1,0,0,1,350,30,1,350,30,1,350,30,1,350,30,1,350,30,0,350,30
+9,1,Step 9: AC input: OFF | Load: OFF | PV: ON | Wait 10 second,Timer,10,0,230,50,1000,1,0,0,0,1,350,30,1,350,30,1,350,30,1,350,30,1,350,30,0,350,30
