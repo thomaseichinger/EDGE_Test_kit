@@ -15,7 +15,7 @@ import csv
 
 
 # filename='Test_0.1.csv'
-filename='ETR002/ETC001_grid_relay_always_on.csv'
+filename='ETR002/ETC008a.csv'
 
 gridsim_present=1
 # edge_pcu=[
@@ -414,6 +414,7 @@ def checkExitCondition(step, exit_type, exit_value, csvwriter):
     if str(exit_type).lower().replace(' ','')=='timer':
         logging.info('Checking timer condition')
         starttime = time.time()
+        print("Step " + str(step))
         while time.time()-starttime<exit_value:
             log_measurement(step, csvwriter, None)
             print(str(exit_value - round(time.time()-starttime)) + " ", end='')
@@ -454,15 +455,19 @@ def checkExitCondition(step, exit_type, exit_value, csvwriter):
         return
 
 def init_gridsim_config():
-    logging.info("Configuring HW Mode 7. Bussing CH1 and CH2")
-    gridsim.query("CONF:HW:MODE 7", False)
-    time.sleep(5)
-    error = gridsim.query("SYST:ERR?")
-    if "No error" not in error:
-        print(error)
-        sys.exit(23)
+    logging.info("Checking if NHR is in HW Mode 7, bussing CH1&2")
+    if "7" not in gridsim.query("CONF:HW:MODE?"):
+        logging.info("Configuring HW Mode 7. Bussing CH1 and CH2")
+        gridsim.query("CONF:HW:MODE 7", False)
+        time.sleep(5)
+        error = gridsim.query("SYST:ERR?")
+        if "No error" not in error:
+            print(error)
+            sys.exit(23)
+        else:
+            print("CoNFIGURED")
     else:
-        print("CoNFIGURED")
+        logging.info("Already configured.")
 
 
 #Test framework
