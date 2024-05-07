@@ -15,7 +15,7 @@ import csv
 
 
 # filename='Test_0.1.csv'
-filename='ETR002/ETC003.csv'
+filename='ETR002/ETC005.csv'
 
 gridsim_present=1
 # edge_pcu=[
@@ -148,7 +148,11 @@ def main():
     try:
         env = os.environ            
         logging.info("Starting yokogawa logger")
-        yokoProc = Popen(['python.exe', 'yokogawa.py', os.path.splitext(outfile)[0]], stdout=PIPE)
+        if sys.platform == 'win32':
+            python_bin = 'pyhont.exe'
+        else:
+            python_bin = './venv/bin/python3'
+        yokoProc = Popen([python_bin, 'yokogawa.py', os.path.splitext(outfile)[0]], stdout=PIPE)
         logging.info("Waiting for yokogawa logger to respond")
         logging.info(yokoProc.stdout.readline(1))
         logging.info("Starting REST_API logger")
@@ -297,10 +301,15 @@ def grid_sim_write_mx45(on_off, ACDC, v, f, slew):
         gridsim.query('OUTP ON')
 
 def getDeviceStatus(pcu_id):
+    if sys.platform == 'win32':
+        host = 'edge-' + pcu_id
+    else:
+        host = 'edge-' + pcu_id + ".local"
+
     try:
         resp = http1.request(
         method="GET",
-        url="http://edge-" + pcu_id + ":4000/api/device/status"
+        url="http://" + host + ":4000/api/device/status"
         )
     except Exception as e:
         logging.error("Error while querying edge-" + pcu_id)
@@ -313,9 +322,14 @@ def getDeviceStatus(pcu_id):
     return resp_obj
 
 def postRawCommand(cmd, pcu_id):
+    if sys.platform == 'win32':
+        host = 'edge-' + pcu_id
+    else:
+        host = 'edge-' + pcu_id + ".local"
+
     return http1.request(
         method="POST",
-        url="http://edge-" + pcu_id + ":4000/api/device/raw_command",
+        url="http://" + host + ":4000/api/device/raw_command",
         headers={
             "Content-Type": "application/json",
             "Accept": "application/json"

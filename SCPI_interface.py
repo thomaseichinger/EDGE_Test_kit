@@ -2,7 +2,9 @@ import sys
 import socket
 from datetime import datetime as dt
 import os
-import msvcrt
+import sys
+if sys.platform == 'win32':
+    import msvcrt
 
 term = '\n'
 

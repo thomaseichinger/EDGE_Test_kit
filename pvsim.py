@@ -1,7 +1,10 @@
 from SCPI_interface import SCPI_interface
 from datetime import datetime as dt
 import os
-import msvcrt, time
+import time
+import sys
+if sys.platform == 'win32':
+    import msvcrt
 
 class pv_sim(SCPI_interface):
 
@@ -19,9 +22,10 @@ class pv_sim(SCPI_interface):
                 f.write('\n' + str(dt.now())+',')
                 f.write(self.query('Measure:Voltage?')+',')
                 f.write(self.query('Measure:Current?'))
-                if msvcrt.kbhit():
-                    if msvcrt.getwche() == '\r':
-                        break
+                if sys.platform == 'win32':
+                    if msvcrt.kbhit():
+                        if msvcrt.getwche() == '\r':
+                            break
 
 def pv_sim_write(pv,o,v,a):
     try:
